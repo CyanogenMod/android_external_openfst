@@ -1,10 +1,17 @@
 if HAVE_FAR
 far_include_headers = fst/extensions/far/compile-strings.h \
-fst/extensions/far/create.h fst/extensions/far/extract.h \
-fst/extensions/far/far.h fst/extensions/far/farlib.h \
-fst/extensions/far/farscript.h fst/extensions/far/info.h \
-fst/extensions/far/main.h fst/extensions/far/print-strings.h \
-fst/extensions/far/stlist.h fst/extensions/far/sttable.h
+fst/extensions/far/create.h fst/extensions/far/equal.h \
+fst/extensions/far/extract.h fst/extensions/far/far.h \
+fst/extensions/far/farlib.h fst/extensions/far/farscript.h \
+fst/extensions/far/info.h fst/extensions/far/main.h \
+fst/extensions/far/print-strings.h fst/extensions/far/stlist.h \
+fst/extensions/far/sttable.h
+endif
+
+if HAVE_NGRAM
+ngram_include_headers = fst/extensions/ngram/bitmap-index.h \
+fst/extensions/ngram/ngram-fst.h \
+fst/extensions/ngram/nthbit.h
 endif
 
 if HAVE_PDT
@@ -20,16 +27,16 @@ script_include_headers = fst/script/arcsort.h fst/script/arg-packs.h \
 fst/script/closure.h fst/script/compile-impl.h fst/script/compile.h \
 fst/script/compose.h fst/script/concat.h fst/script/connect.h \
 fst/script/convert.h fst/script/decode.h fst/script/determinize.h \
-fst/script/difference.h fst/script/draw-impl.h fst/script/draw.h \
-fst/script/encode.h fst/script/epsnormalize.h fst/script/equal.h \
-fst/script/equivalent.h fst/script/fst-class.h fst/script/fstscript.h \
-fst/script/info-impl.h fst/script/info.h fst/script/intersect.h \
-fst/script/invert.h fst/script/map.h fst/script/minimize.h \
-fst/script/print-impl.h fst/script/print.h fst/script/project.h \
-fst/script/prune.h fst/script/push.h fst/script/randequivalent.h \
-fst/script/randgen.h fst/script/register.h fst/script/relabel.h \
-fst/script/replace.h fst/script/reverse.h fst/script/reweight.h \
-fst/script/rmepsilon.h fst/script/script-impl.h \
+fst/script/difference.h fst/script/disambiguate.h  fst/script/draw-impl.h \
+fst/script/draw.h fst/script/encode.h fst/script/epsnormalize.h \
+fst/script/equal.h fst/script/equivalent.h fst/script/fst-class.h \
+fst/script/fstscript.h fst/script/info-impl.h fst/script/info.h \
+fst/script/intersect.h fst/script/invert.h fst/script/map.h \
+fst/script/minimize.h fst/script/print-impl.h fst/script/print.h \
+fst/script/project.h fst/script/prune.h fst/script/push.h \
+fst/script/randequivalent.h fst/script/randgen.h fst/script/register.h \
+fst/script/relabel.h fst/script/replace.h fst/script/reverse.h \
+fst/script/reweight.h fst/script/rmepsilon.h fst/script/script-impl.h \
 fst/script/shortest-distance.h fst/script/shortest-path.h \
 fst/script/symbols.h fst/script/synchronize.h fst/script/text-io.h \
 fst/script/topsort.h fst/script/union.h fst/script/weight-class.h \
@@ -60,8 +67,8 @@ fst/accumulator.h fst/interval-set.h fst/state-reachable.h \
 fst/lookahead-filter.h fst/generic-register.h fst/edit-fst.h \
 fst/replace-util.h fst/icu.h fst/string.h fst/signed-log-weight.h \
 fst/sparse-tuple-weight.h fst/sparse-power-weight.h fst/expectation-weight.h \
-fst/symbol-table-ops.h fst/bi-table.h \
+fst/symbol-table-ops.h fst/bi-table.h fst/mapped-file.h \
 $(far_include_headers) \
+$(ngram_include_headers) \
 $(pdt_include_headers) \
 $(script_include_headers)
-

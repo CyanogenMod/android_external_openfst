@@ -1,4 +1,4 @@
-AC_INIT([OpenFst], [1.2.10], [help@www.openfst.org])
+AC_INIT([OpenFst], [1.3.3], [help@www.openfst.org])
 AM_INIT_AUTOMAKE([foreign nostdinc -Wall -Werror])
 
 AC_PROG_CXX
@@ -19,6 +19,7 @@ AC_CONFIG_FILES([
   src/extensions/const/Makefile
   src/extensions/far/Makefile
   src/extensions/lookahead/Makefile
+  src/extensions/ngram/Makefile
   src/extensions/pdt/Makefile
   src/script/Makefile
 ])
@@ -63,6 +64,15 @@ AC_ARG_ENABLE([far], [AS_HELP_STRING([--enable-far], [enable FAR extensions])],
 AM_CONDITIONAL([HAVE_FAR], [test "x$enable_far" != xno])
 
 AC_ARG_ENABLE(
+	[ngram-fsts],
+	[AS_HELP_STRING(
+		[--enable-ngram-fsts],
+		[enable NGramFst extension])],
+	[],
+	[enable_ngram_fsts=no])
+AM_CONDITIONAL([HAVE_NGRAM], [test "x$enable_ngram_fsts" != xno])
+
+AC_ARG_ENABLE(
 	[lookahead-fsts],
 	[AS_HELP_STRING(
 		[--enable-lookahead-fsts],
@@ -74,20 +84,6 @@ AM_CONDITIONAL([HAVE_LOOKAHEAD], [test "x$enable_lookahead_fsts" != xno])
 AC_ARG_ENABLE([pdt], [AS_HELP_STRING([--enable-pdt], [enable PDT extensions])],
               [], [enable_pdt=no])
 AM_CONDITIONAL([HAVE_PDT], [test "x$enable_pdt" != xno])
-
-AC_ARG_WITH([icu],
-  [AS_HELP_STRING([--with-icu],
-    [enable UTF8 support using the ICU Library])],
-  [],
-  [with_icu=no])
-AS_IF([test "x$with_icu" != xno],
-  [AC_CHECK_ICU(
-    [4.2],
-    [AC_DEFINE([HAVE_ICU],
-      [1],
-      [Define to 1 if you have the ICU library.])],
-    [AC_MSG_FAILURE(
-      [--with-icu was given, but ICU Library v. 4.2 or newer not found])])])
 
 AC_SUBST([libfstdir], [${libdir}/fst])
 

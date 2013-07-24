@@ -22,10 +22,9 @@
 #define FST_LIB_FACTOR_WEIGHT_H__
 
 #include <algorithm>
-#include <unordered_map>
+#include <tr1/unordered_map>
 using std::tr1::unordered_map;
 using std::tr1::unordered_multimap;
-#include <fst/slist.h>
 #include <string>
 #include <utility>
 using std::pair; using std::make_pair;

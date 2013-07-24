@@ -1,4 +1,3 @@
-Openfst openfst-1.2.10
-Updated to Google CL27738347
+Copy of openfst-1.3.3-CL41851770.tar.gz from Greco3.
 
-Modified to use stlport, Android.mk file added.
+Android.mk file added.

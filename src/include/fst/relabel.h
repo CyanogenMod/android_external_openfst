@@ -21,7 +21,7 @@
 #ifndef FST_LIB_RELABEL_H__
 #define FST_LIB_RELABEL_H__
 
-#include <unordered_map>
+#include <tr1/unordered_map>
 using std::tr1::unordered_map;
 using std::tr1::unordered_multimap;
 #include <string>
@@ -33,6 +33,10 @@ using std::vector;
 #include <fst/cache.h>
 #include <fst/test-properties.h>
 
+
+#include <tr1/unordered_map>
+using std::tr1::unordered_map;
+using std::tr1::unordered_multimap;
 
 namespace fst {
 

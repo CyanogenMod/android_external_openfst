@@ -21,7 +21,7 @@
 #ifndef FST_LIB_RMEPSILON_H__
 #define FST_LIB_RMEPSILON_H__
 
-#include <unordered_map>
+#include <tr1/unordered_map>
 using std::tr1::unordered_map;
 using std::tr1::unordered_multimap;
 #include <fst/slist.h>
@@ -110,7 +110,6 @@ class RmEpsilonState {
   class ElementKey {
    public:
     size_t operator()(const Element& e) const {
-      return static_cast<size_t>(e.nextstate);
       return static_cast<size_t>(e.nextstate +
                                  e.ilabel * kPrime0 +
                                  e.olabel * kPrime1);

@@ -24,6 +24,7 @@
 #include <fst/vector-fst.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 // Classes to support "boxing" all existing types of FST arcs in a single
 // FstClass which hides the arc types. This allows clients to load
@@ -51,7 +52,8 @@ class FstClassBase {
   virtual const string &WeightType() const = 0;
   virtual const SymbolTable *InputSymbols() const = 0;
   virtual const SymbolTable *OutputSymbols() const = 0;
-  virtual void Write(const string& fname) const = 0;
+  virtual bool Write(const string& fname) const = 0;
+  virtual bool Write(ostream &ostr, const FstWriteOptions &opts) const = 0;
   virtual uint64 Properties(uint64 mask, bool test) const = 0;
   virtual ~FstClassBase() { }
 };
@@ -79,6 +81,8 @@ class FstClassImpl : public FstClassImplBase {
   explicit FstClassImpl(Fst<Arc> *impl,
                         bool should_own = false) :
       impl_(should_own ? impl : impl->Copy()) { }
+
+  explicit FstClassImpl(const Fst<Arc> &impl) : impl_(impl.Copy()) {  }
 
   virtual const string &ArcType() const {
     return Arc::Type();
@@ -110,8 +114,12 @@ class FstClassImpl : public FstClassImplBase {
     static_cast<MutableFst<Arc> *>(impl_)->SetOutputSymbols(os);
   }
 
-  virtual void Write(const string &fname) const {
-    impl_->Write(fname);
+  virtual bool Write(const string &fname) const {
+    return impl_->Write(fname);
+  }
+
+  virtual bool Write(ostream &ostr, const FstWriteOptions &opts) const {
+    return impl_->Write(ostr, opts);
   }
 
   virtual uint64 Properties(uint64 mask, bool test) const {
@@ -119,6 +127,8 @@ class FstClassImpl : public FstClassImplBase {
   }
 
   virtual ~FstClassImpl() { delete impl_; }
+
+  Fst<Arc> *GetImpl() const { return impl_; }
 
   Fst<Arc> *GetImpl() { return impl_; }
 
@@ -154,12 +164,24 @@ class FstClass : public FstClassBase {
     }
   }
 
-  template<class Arc>
-  explicit FstClass(Fst<Arc> *fst) : impl_(new FstClassImpl<Arc>(fst)) { }
+  FstClass() : impl_(NULL) {
+  }
 
-  explicit FstClass(const FstClass &other) : impl_(other.impl_->Copy()) { }
+  template<class Arc>
+  explicit FstClass(const Fst<Arc> &fst) : impl_(new FstClassImpl<Arc>(fst)) {
+  }
+
+  FstClass(const FstClass &other) : impl_(other.impl_->Copy()) { }
+
+  FstClass &operator=(const FstClass &other) {
+    delete impl_;
+    impl_ = other.impl_->Copy();
+    return *this;
+  }
 
   static FstClass *Read(const string &fname);
+
+  static FstClass *Read(istream &istr, const string &source);
 
   virtual const string &ArcType() const {
     return impl_->ArcType();
@@ -181,8 +203,12 @@ class FstClass : public FstClassBase {
     return impl_->WeightType();
   }
 
-  virtual void Write(const string &fname) const {
-    impl_->Write(fname);
+  virtual bool Write(const string &fname) const {
+    return impl_->Write(fname);
+  }
+
+  virtual bool Write(ostream &ostr, const FstWriteOptions &opts) const {
+    return impl_->Write(ostr, opts);
   }
 
   virtual uint64 Properties(uint64 mask, bool test) const {
@@ -214,6 +240,8 @@ class FstClass : public FstClassBase {
                << "particular arc type.";
     return 0;
   }
+
+
  protected:
   explicit FstClass(FstClassImplBase *impl) : impl_(impl) { }
 
@@ -227,13 +255,18 @@ class FstClass : public FstClassBase {
     if (!u) {
       return 0;
     } else {
-      FstClassT *r = new FstClassT(u);
+      FstClassT *r = new FstClassT(*u);
       delete u;
       return r;
     }
   }
 
+  FstClassImplBase *GetImpl() const { return impl_; }
+
   FstClassImplBase *GetImpl() { return impl_; }
+
+//  friend ostream &operator<<(ostream&, const FstClass&);
+
  private:
   FstClassImplBase *impl_;
 };
@@ -245,7 +278,7 @@ class FstClass : public FstClassBase {
 class MutableFstClass : public FstClass {
  public:
   template<class Arc>
-  explicit MutableFstClass(MutableFst<Arc> *fst) :
+  explicit MutableFstClass(const MutableFst<Arc> &fst) :
       FstClass(fst) { }
 
   template<class Arc>
@@ -263,10 +296,18 @@ class MutableFstClass : public FstClass {
     if (!mfst) {
       return 0;
     } else {
-      MutableFstClass *retval = new MutableFstClass(mfst);
+      MutableFstClass *retval = new MutableFstClass(*mfst);
       delete mfst;
       return retval;
     }
+  }
+
+  virtual bool Write(const string &fname) const {
+    return GetImpl()->Write(fname);
+  }
+
+  virtual bool Write(ostream &ostr, const FstWriteOptions &opts) const {
+    return GetImpl()->Write(ostr, opts);
   }
 
   static MutableFstClass *Read(const string &fname, bool convert = false);
@@ -305,7 +346,7 @@ class VectorFstClass : public MutableFstClass {
   explicit VectorFstClass(const string &arc_type);
 
   template<class Arc>
-  explicit VectorFstClass(VectorFst<Arc> *fst) :
+  explicit VectorFstClass(const VectorFst<Arc> &fst) :
       MutableFstClass(fst) { }
 
   template<class Arc>
@@ -315,7 +356,7 @@ class VectorFstClass : public MutableFstClass {
     if (!vfst) {
       return 0;
     } else {
-      VectorFstClass *retval = new VectorFstClass(vfst);
+      VectorFstClass *retval = new VectorFstClass(*vfst);
       delete vfst;
       return retval;
     }
@@ -338,6 +379,4 @@ class VectorFstClass : public MutableFstClass {
 
 }  // namespace script
 }  // namespace fst
-
-
 #endif  // FST_SCRIPT_FST_CLASS_H_

@@ -21,17 +21,18 @@
 #include <cctype>
 #include <string>
 #include <fst/util.h>
+#include <fst/mapped-file.h>
 
 // Utility flag definitions
 
 DEFINE_bool(fst_error_fatal, true,
             "FST errors are fatal; o.w. return objects flagged as bad: "
-            " e.g., FSTs - kError prop. true, FST weights - not  a member()");
+            " e.g., FSTs - kError prop. true, FST weights - not  a Member()");
 
 namespace fst {
 
 int64 StrToInt64(const string &s, const string &src, size_t nline,
-                 bool allow_negative = false, bool *error) {
+                 bool allow_negative, bool *error) {
   int64 n;
   const char *cs = s.c_str();
   char *p;
@@ -49,7 +50,7 @@ int64 StrToInt64(const string &s, const string &src, size_t nline,
 void Int64ToStr(int64 n, string *s) {
   ostringstream nstr;
   nstr << n;
-  *s = nstr.str();
+  s->append(nstr.str().data(), nstr.str().size());
 }
 
 void ConvertToLegalCSymbol(string *s) {
@@ -59,15 +60,15 @@ void ConvertToLegalCSymbol(string *s) {
 
 // Skips over input characters to align to 'align' bytes. Returns
 // false if can't align.
-bool AlignInput(istream &strm, int align) {
+bool AlignInput(istream &strm) {
   char c;
-  for (int i = 0; i < align; ++i) {
+  for (int i = 0; i < MappedFile::kArchAlignment; ++i) {
     int64 pos = strm.tellg();
     if (pos < 0) {
       LOG(ERROR) << "AlignInput: can't determine stream position";
       return false;
     }
-    if (pos % align == 0) break;
+    if (pos % MappedFile::kArchAlignment == 0) break;
     strm.read(&c, 1);
   }
   return true;
@@ -75,14 +76,14 @@ bool AlignInput(istream &strm, int align) {
 
 // Write null output characters to align to 'align' bytes. Returns
 // false if can't align.
-bool AlignOutput(ostream &strm, int align) {
-  for (int i = 0; i < align; ++i) {
+bool AlignOutput(ostream &strm) {
+  for (int i = 0; i < MappedFile::kArchAlignment; ++i) {
     int64 pos = strm.tellp();
     if (pos < 0) {
       LOG(ERROR) << "AlignOutput: can't determine stream position";
       return false;
     }
-    if (pos % align == 0) break;
+    if (pos % MappedFile::kArchAlignment == 0) break;
     strm.write("", 1);
   }
   return true;

@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <fst/util.h>
 
 #include <algorithm>
@@ -58,7 +59,7 @@ class STListWriter {
 
   explicit STListWriter(const string filename)
       : stream_(
-          filename.empty() ? &std::cout :
+          filename.empty() ? &cout :
           new ofstream(filename.c_str(), ofstream::out | ofstream::binary)),
         error_(false) {
     WriteType(*stream_, kSTListMagicNumber);
@@ -92,7 +93,7 @@ class STListWriter {
 
   ~STListWriter() {
     WriteType(*stream_, string());
-    if (stream_ != &std::cout)
+    if (stream_ != &cout)
       delete stream_;
   }
 
@@ -127,7 +128,7 @@ class STListReader {
     for (size_t i = 0; i < filenames.size(); ++i) {
       if (filenames[i].empty()) {
         if (!has_stdin) {
-          streams_[i] = &std::cin;
+          streams_[i] = &cin;
           sources_[i] = "stdin";
           has_stdin = true;
         } else {
@@ -144,13 +145,13 @@ class STListReader {
       ReadType(*streams_[i], &magic_number);
       ReadType(*streams_[i], &file_version);
       if (magic_number != kSTListMagicNumber) {
-        FSTERROR() << "STListReader::STTableReader: wrong file type: "
+        FSTERROR() << "STListReader::STListReader: wrong file type: "
                    << filenames[i];
         error_ = true;
         return;
       }
       if (file_version != kSTListFileVersion) {
-        FSTERROR() << "STListReader::STTableReader: wrong file version: "
+        FSTERROR() << "STListReader::STListReader: wrong file version: "
                    << filenames[i];
         error_ = true;
         return;
@@ -160,7 +161,7 @@ class STListReader {
       if (!key.empty())
         heap_.push(make_pair(key, i));
       if (!*streams_[i]) {
-        FSTERROR() << "STTableReader: error reading file: " << sources_[i];
+        FSTERROR() << "STListReader: error reading file: " << sources_[i];
         error_ = true;
         return;
       }
@@ -169,7 +170,7 @@ class STListReader {
     size_t current = heap_.top().second;
     entry_ = entry_reader_(*streams_[current]);
     if (!entry_ || !*streams_[current]) {
-      FSTERROR() << "STTableReader: error reading entry for key: "
+      FSTERROR() << "STListReader: error reading entry for key: "
                  << heap_.top().first << ", file: " << sources_[current];
       error_ = true;
     }
@@ -177,7 +178,7 @@ class STListReader {
 
   ~STListReader() {
     for (size_t i = 0; i < streams_.size(); ++i) {
-      if (streams_[i] != &std::cin)
+      if (streams_[i] != &cin)
         delete streams_[i];
     }
     if (entry_)
@@ -218,7 +219,7 @@ class STListReader {
     heap_.pop();
     ReadType(*(streams_[current]), &key);
     if (!*streams_[current]) {
-      FSTERROR() << "STTableReader: error reading file: "
+      FSTERROR() << "STListReader: error reading file: "
                  << sources_[current];
       error_ = true;
       return;
@@ -232,7 +233,7 @@ class STListReader {
         delete entry_;
       entry_ = entry_reader_(*streams_[current]);
       if (!entry_ || !*streams_[current]) {
-        FSTERROR() << "STTableReader: error reading entry for key: "
+        FSTERROR() << "STListReader: error reading entry for key: "
                    << heap_.top().first << ", file: " << sources_[current];
         error_ = true;
       }
@@ -266,8 +267,8 @@ class STListReader {
 // String-type list header reading function template on the entry header
 // type 'H' having a member function:
 //   Read(istream &strm, const string &filename);
-// Checks that 'filename' is an STTable and call the H::Read() on the last
-// entry in the STTable.
+// Checks that 'filename' is an STList and call the H::Read() on the last
+// entry in the STList.
 // Does not support reading from stdin.
 template <class H>
 bool ReadSTListHeader(const string &filename, H *header) {
@@ -280,18 +281,18 @@ bool ReadSTListHeader(const string &filename, H *header) {
   ReadType(strm, &magic_number);
   ReadType(strm, &file_version);
   if (magic_number != kSTListMagicNumber) {
-    LOG(ERROR) << "ReadSTTableHeader: wrong file type: " << filename;
+    LOG(ERROR) << "ReadSTListHeader: wrong file type: " << filename;
     return false;
   }
   if (file_version != kSTListFileVersion) {
-    LOG(ERROR) << "ReadSTTableHeader: wrong file version: " << filename;
+    LOG(ERROR) << "ReadSTListHeader: wrong file version: " << filename;
     return false;
   }
   string key;
   ReadType(strm, &key);
   header->Read(strm, filename + ":" + key);
   if (!strm) {
-    LOG(ERROR) << "ReadSTTableHeader: error reading file: " << filename;
+    LOG(ERROR) << "ReadSTListHeader: error reading file: " << filename;
     return false;
   }
   return true;

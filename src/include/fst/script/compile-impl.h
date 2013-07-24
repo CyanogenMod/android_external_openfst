@@ -21,7 +21,7 @@
 #ifndef FST_SCRIPT_COMPILE_IMPL_H_
 #define FST_SCRIPT_COMPILE_IMPL_H_
 
-#include <unordered_map>
+#include <tr1/unordered_map>
 using std::tr1::unordered_map;
 using std::tr1::unordered_multimap;
 #include <sstream>
@@ -31,6 +31,7 @@ using std::vector;
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <fst/fst.h>
 #include <fst/util.h>
 #include <fst/vector-fst.h>

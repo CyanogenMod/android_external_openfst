@@ -34,14 +34,17 @@ void FarCompileStrings(const vector<string> &in_fnames,
                        FarTokenType tt,
                        const string &symbols_fname,
                        const string &unknown_symbol,
+                       bool keep_symbols,
+                       bool initial_symbols,
                        bool allow_negative_labels,
                        bool file_list_input,
                        const string &key_prefix,
                        const string &key_suffix) {
   FarCompileStringsArgs args(in_fnames, out_fname, fst_type, far_type,
                              generate_keys, fet, tt, symbols_fname,
-                             unknown_symbol, allow_negative_labels,
-                             file_list_input, key_prefix, key_suffix);
+                             unknown_symbol, keep_symbols, initial_symbols,
+                             allow_negative_labels, file_list_input,
+                             key_prefix, key_suffix);
 
   Apply<Operation<FarCompileStringsArgs> >("FarCompileStrings", arc_type,
                                            &args);
@@ -61,12 +64,26 @@ void FarCreate(const vector<string> &in_fnames,
   Apply<Operation<FarCreateArgs> >("FarCreate", arc_type, &args);
 }
 
+bool FarEqual(const string &filename1, const string &filename2,
+              const string &arc_type, float delta,
+              const string &begin_key, const string &end_key) {
+  FarEqualInnerArgs args(filename1, filename2, delta, begin_key, end_key);
+  FarEqualArgs args_with_retval(args);
+
+  Apply<Operation<FarEqualArgs> >("FarEqual", arc_type, &args_with_retval);
+  return args_with_retval.retval;
+}
+
 void FarExtract(const vector<string> &ifilenames,
                 const string &arc_type,
-                int32 generate_filenames, const string &begin_key,
-                const string &end_key, const string &filename_prefix,
+                int32 generate_filenames,
+                const string &keys,
+                const string &key_separator,
+                const string &range_delimiter,
+                const string &filename_prefix,
                 const string &filename_suffix) {
-  FarExtractArgs args(ifilenames, generate_filenames, begin_key, end_key,
+  FarExtractArgs args(ifilenames, generate_filenames, keys,
+                      key_separator, range_delimiter,
                       filename_prefix, filename_suffix);
 
   Apply<Operation<FarExtractArgs> >("FarExtract", arc_type, &args);
@@ -89,15 +106,16 @@ void FarPrintStrings(const vector<string> &ifilenames,
                      const string &begin_key,
                      const string &end_key,
                      const bool print_key,
+                     const bool print_weight,
                      const string &symbols_fname,
+                     const bool initial_symbols,
                      const int32 generate_filenames,
                      const string &filename_prefix,
                      const string &filename_suffix) {
-  FarPrintStringsArgs args(ifilenames, entry_type, token_type, begin_key,
-                           end_key, print_key, symbols_fname,
-                           generate_filenames,
-                           filename_prefix,
-                           filename_suffix);
+  FarPrintStringsArgs args(ifilenames, entry_type, token_type,
+                           begin_key, end_key, print_key, print_weight,
+                           symbols_fname, initial_symbols, generate_filenames,
+                           filename_prefix, filename_suffix);
 
   Apply<Operation<FarPrintStringsArgs> >("FarPrintStrings", arc_type,
                                          &args);
